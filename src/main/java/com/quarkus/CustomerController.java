@@ -1,7 +1,9 @@
 package com.quarkus;
 
-import io.vertx.axle.core.eventbus.EventBus;
-import io.vertx.axle.core.eventbus.Message;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.smallrye.mutiny.Uni;
+import io.vertx.mutiny.core.eventbus.EventBus;
+import io.vertx.mutiny.core.eventbus.Message;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -9,7 +11,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 @Path("customers")
 @ApplicationScoped
@@ -47,11 +48,11 @@ public class CustomerController {
     @GET
     @Path("/call")
     @Produces(MediaType.TEXT_PLAIN)
-    public CompletionStage<String> call(@QueryParam("id") Integer customerId) {
+    public Uni<String> call(@QueryParam("id") Integer customerId) throws JsonProcessingException {
 
-        return bus.<String>request("callcustomer", customerRepository.findCustomerById(customerId))
-                .thenApply(Message::body)
-                .exceptionally(Throwable::getMessage);
+        return bus.<String>request("callcustomer", JsonHelper.read(customerRepository.findCustomerById(customerId)))
+                .onItem().transform(Message::body);
+
     }
 
 }

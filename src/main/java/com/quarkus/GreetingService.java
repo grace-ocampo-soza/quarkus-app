@@ -13,8 +13,7 @@ import java.util.concurrent.CompletionStage;
 @ApplicationScoped
 public class GreetingService {
 
-    @Inject
-    ManagedExecutor executor;
+    @Inject ManagedExecutor executor;
 
     @ConsumeEvent("greeting")
     public String consume(String name) {
